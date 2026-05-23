@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
   checks: write
 
 jobs:
@@ -38,15 +39,17 @@ jobs:
           npm test -- --reporter=default --reporter=junit --outputFile.junit=reports/vitest-junit.xml
 
       - name: Publish test report
-        if: always() && hashFiles('reports/vitest-junit.xml') != ''
-        uses: mikepenz/action-junit-report@v6
+        if: ${{ !cancelled() }}
+        uses: dorny/test-reporter@v3
         with:
-          report_paths: reports/vitest-junit.xml
-          detailed_summary: true
-          include_passed: true
+          name: Vitest Tests
+          path: reports/vitest-junit.xml
+          reporter: java-junit
+          use-actions-summary: true
+          only-summary: true
 
       - name: Upload test report artifact
-        if: always() && hashFiles('reports/vitest-junit.xml') != ''
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: vitest-junit-report
